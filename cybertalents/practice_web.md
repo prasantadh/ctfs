@@ -8,7 +8,8 @@ Enter the website provided in the challenge and you'll be redirected to a login 
 View the page source of the webpage by right clicking and selecting 'View Page Source'
 You'll find a comment that includes support username and password 
 
-"  <!-- TODO: remove this line ,  for maintenance purpose use this inf(user:support password:x34245323)-->"
+ <!-- TODO: remove this line ,  for maintenance purpose use this inf(user:support password:x34245323)-->
+
 Trying to use these credentials would only redirect you to the support page with no flag
 Next you want to open up burp suite and intercept your requests
 Try logging back in again with the same credentials but this time with proxy intercept on
