@@ -15,4 +15,3 @@ Try logging back in again with the same credentials but this time with proxy int
 You'll find that there is a role variable that is set to support, change that to admin and forward your request
 After forwarding your request you should see a new webpage that includes the flag (hiadminyouhavethepower)
 
-
