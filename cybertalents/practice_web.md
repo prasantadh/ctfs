@@ -8,7 +8,7 @@ Challenge: Administrators only has the power to see the flag , can you be one ?
 
 2. View the page source of the webpage by right clicking and selecting 'View Page Source'.
 
-3. You'll find a comment that includes support username and password. 
+3. You'll find the following comment that includes support username and password. 
 
    _TODO: remove this line ,  for maintenance purpose use this(user:support password:x34245323)_
 
