@@ -68,6 +68,28 @@ for i in range(1, 8):
 # actually solved it at the time.
 ```
 
+#### Just Keyp Trying
+
+![1527410006055](assets/1527410006055.png)
+
+Looking into the file in the hint reveals that the data is from an external device. The `keyp` in the title is probably a hint that what is to come was pressed from a keyboard. We can look at the keyboard usage section on the `pdf` to get the format for the input. (The last eight bytes are the data bytes. The following python script  reveals the flag.)
+
+```python
+from scapy.all import rdpcap
+
+hid = '0000abcdefghijklmnopqrstuvwxyz12345678900000 -=[]'
+HID = '0000ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()0000 _+{}'
+pcap = rdpcap("data.pcap")
+flag = ''
+for p in pcap:
+    if p.load[-6] != 0:
+        if p.load[-8] != int('0x20', 16):
+            flag += hid[p.load[-6]]
+        else:
+            flag += HID[p.load[-6]]
+print(flag)
+```
+
 ### Cryptography
 
 #### SoRandom
@@ -110,7 +132,7 @@ Now modify `sorandom.py` to solve this cipher:
 #!/usr/bin/python -u
 import random,string
 
-flag = BNZQ:jn0y1313td7975784y0361tp3xou1g44
+flag = "BNZQ:jn0y1313td7975784y0361tp3xou1g44"
 encflag = ""
 random.seed("random")
 for c in flag:
@@ -123,6 +145,12 @@ for c in flag:
     encflag += chr((ord(c)-ord('0')-random.randrange(0,10))%10 + ord('0'))
   else:
     encflag += c
-print "Unguessably Randomized Flag: "+encflag
+print "Decrypted Flag: "+encflag
 ```
+
+#### Leaked Hashes
+
+Use a website like [this one](https://www.onlinehashcrack.com/hash-identification.php#results) to identify the hash. In this case, the hash is `md5`. Then use the website like [this one](https://hashkiller.co.uk/md5-decrypter.aspx) to get find the original password. For any cracked hash, log in as the user and access the cat database. The flag is in the banner art.
+
+
 
