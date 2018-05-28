@@ -22,8 +22,6 @@ Challenge: Administrators only has the power to see the flag , can you be one ?
 
 8. After forwarding your request you should see a new webpage that includes the flag (hiadminyouhavethepower).
 
-
-
 ### This Is Sparta
 
 ```html
@@ -53,26 +51,26 @@ Challenge: can you reveal the admin password ?
 
 4. You will get an error on the top left so we know that it is possible, but we have to find out what type of sql injection are we going to use
 
-5. try finding the sql version used in the webpage by using 			
+  . try finding the sql version used in the webpage by using 			
 
-   ```
-   sddffjk' || (select sqlite_version()));--
-   ```
+  ```
+  sddffjk' || (select sqlite_version()));--
+  ```
 
-6. You'll find that its sqlite so we need to find the tables used so we type in this:
+5. You'll find that its sqlite so we need to find the tables used so we type in this:
 
    ```
    sdfjsks' || (SELECT sql FROM sqlite_master));--
    ```
 
-7. Now we know that there's a table called xde43_users which has a password field and a role field
+6. Now we know that there's a table called xde43_users which has a password field and a role field
    so we create a query that searches for all passwords with users that have the admin role		
 
    ```
    adjkasw' || (select password from xde43_users where role="admin"));--
    ```
 
-8. After doing so, a new post will be seen with the flag included (flag245698)
+7. After doing so, a new post will be seen with the flag included (flag245698)
 
 ### I Am Legend
 
@@ -102,6 +100,47 @@ Challenge: If I am a legend, then why am I so lonely?
 
 9. Entering those credentials will redirect you to a page with the Flag: {J4V4_Scr1Pt_1S_S0_D4MN_FUN}
 
+### Cool Name Effect
 
+```html
+Challenge: Webmaster developed a simple script to do cool effects on your name, but his code not filtering the inputs correctly execute javascript alert and prove it.
+```
 
+1. Enter the website provided in the challenge and you'll be redirected to a webapp
+2. View the page source of the webpage by right clicking and selecting 'View Page Source'
+3. You'll notice an eval function that is packed, use any online unpacker to make the function more readable, you can use unpackers such as [this one](http://matthewfl.com/unPacker.html)
+4. You'll find a function within it that includes a variable that spells out **y o u r f l a g i s **
+5. You can use an online javascript tester to check the output of this function that should come out as an alert such I used [this one](http://js.do)
+6. Copy the function to the tester 
+7. Change 	legacyAlert to alert since its aliased in the original code
+8. run the test and you'll get an alert with the flag (ciyypjz)
 
+### Encrypted Database
+
+```html
+Challenge: The company hired an inexperienced developer, but he told them he hided the database and have it encrypted so the website is totally secure, can you prove that he is wrong ??
+```
+
+1. Enter the website provided in the challenge and you'll be redirected to a webpage that includes some links
+
+2. going through the different links, we can't find any login pages or databases that we can enter
+
+3. View the page source of the home page by right clicking and selecting 'View Page Source'
+
+4. you'll find a link called _secret-admin/assets/app.js_
+
+5. going to the link will be of no use, but since we know that there's a secret-admin directory in the database, we can go to that by adding secret admin to the url which would redirect us to the login page
+
+   ```
+   (http://ec2-34-216-12-86.us-west-2.compute.amazonaws.com/encrypted-database/secret-admin/)
+   ```
+
+6. ​	Checking the page source of the login page, we can see a hidden db with the value _hidden-database/db.json_
+
+7. ​	We try adding the db value to the url directory like how we did earlier 
+
+   ```html
+   http://ec2-34-216-12-86.us-west-2.compute.amazonaws.com/encrypted-database/secret-admin/hidden-database/db.json
+   ```
+
+8. ​	This redirects us to a page with the {"flag":"ab003765f3424bf8e2c8d1d69762d72c"}
