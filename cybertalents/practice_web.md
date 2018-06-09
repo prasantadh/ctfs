@@ -144,3 +144,4 @@ Challenge: The company hired an inexperienced developer, but he told them he hid
    ```
 
 8. ​	This redirects us to a page with the {"flag":"ab003765f3424bf8e2c8d1d69762d72c"}
+9. ​ Decrypt the MD5 Hash to gain the flag
