@@ -68,3 +68,114 @@ with open('assets/lineq.txt') as f:
 		print(chr(x % 256), end='')
 ```
 
+### Arithmetic
+
+Solved in collaboration with [wleightond](https://github.com/wleightond).
+
+```tex
+Challenge: SHA256 is safe, the cipher is not?
+```
+
+We are given a cipher text and the file used to encrypt the text.
+
+```python
+#-*- coding:utf-8 -*-
+
+import os
+from hashlib import sha256
+
+def H(v):
+    return int(sha256(str(v)).hexdigest(), 16)
+
+def STEP(v):
+    return (31338 * v**3 + 17 * v**2 + 2017 * v + 10) % 2**256
+
+def encrypt(pt, key):
+    state = H(key)
+    ct = ""
+    for c in pt:
+        c = ord(c)
+        for i in xrange(32):
+            op = state % 4
+            state = STEP(state)
+
+            v = state % 256
+            state = STEP(state)
+
+            if op == 0:
+                c = (c + v) % 256
+            elif op == 1:
+                c = (c ^ v) % 256
+            elif op == 2:
+                c = (c - v) % 256
+            elif op == 3:
+                c = (c * (v | 1)) % 256
+        state ^= c
+        ct += chr(c)
+    return ct
+
+
+print encrypt(open("flag.txt").read().strip(), os.urandom(32)).encode("hex")
+## ciphertext: 868c017b7bef15e04ccc5f2d6b4c372fdff881080155
+```
+
+After a bit of playing around, we noticed that `op` was only producing `0` or `2` after the first random value. We also noticed that `STEP` function had a cycle and also always returned an even number. Both of these were observations that did not help.
+
+[wleightond](https://github.com/wleightond) had the hunch that perhaps as long as we keep the final byte of the key constant, the subsequent final bytes were going to be the same on the output of the `STEP` function. So we verified it:
+
+```python
+ import os
+ from hashlib import sha256
+ 
+ ct = "868c017b7bef15e04ccc5f2d6b4c372fdff881080155".decode('hex')
+ 
+ def H(v):
+     return int(sha256(str(v)).hexdigest(), 16)
+ 
+ def STEP(v):
+     return (31338 * v**3 + 17 * v**2 + 2017 * v + 10) % 2**256
+ 
+ # verify suspicion that as long as the last byte is the same
+ # the step function will give us exactly the same sequence
+ # of last bytes afterwards
+ x = H(os.urandom(32))
+ y = x % 256
+ for i in range(100):
+     if STEP(x) % 256 != STEP(y) % 256:
+         print "wrong direction"
+ print "suspicion verified"
+```
+
+From here, we knew that the first four bytes probably were `flag`. We could use that information to get the initial state. So we did.
+
+```python
+l = [encrypt('flag', i).encode('hex') for i in range(0, 256)]
+l.index('868c017b')
+```
+
+This raised a `ValueError` because none of the initial state encrypted the text to that value. So we tried a little tweak.
+
+```python
+l = [encrypt('flag', i).encode('hex') for i in range(0, 256)]
+l.index('868c017b')
+```
+
+This worked! The initial state was `47`.  So we wrote a script to brute force the rest of the flag.
+
+```python
+### ....
+def encrypt(pt):
+    state = 47
+	### ...
+ct = "868c017b7bef15e04ccc5f2d6b4c372fdff881080155".decode('hex')
+pt = 'FLAG{'
+while len(pt) < len(ct):
+    c = chr(32)
+    while encrypt(pt + c) != ct[:len(pt) + 1]: ## here you have to run the check for 
+        ## for whole string (and not just single character) due to collision issue
+        c = chr(ord(c) + 1)
+    pt += c
+print(pt)
+```
+
+Caveat: Use `python2` for running all programs. 
