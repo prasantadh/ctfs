@@ -179,3 +179,61 @@ print(pt)
 ```
 
 Caveat: Use `python2` for running all programs. 
+
+### genfei
+
+#####  Solved in collaboration with [moni286](https://github.com/moni286)
+
+The code we get from the organizers is
+
+```python
+import sys
+from struct import pack, unpack
+
+def F(w):
+	return ((w * 31337) ^ (w * 1337 >> 16)) % 2**32
+
+def encrypt(block):
+	a, b, c, d = unpack("<4I", block)
+	for rno in xrange(32):
+		a, b, c, d = b ^ F(a | F(c ^ F(d)) ^ F(a | c) ^ d), c ^ F(a ^ F(d) ^ (a | d)), d ^ F(a | F(a) ^ a), a ^ 31337
+		a, b, c, d = c ^ F(d | F(b ^ F(a)) ^ F(d | b) ^ a), b ^ F(d ^ F(a) ^ (d | a)), a ^ F(d | F(d) ^ d), d ^ 1337
+	return pack("<4I", a, b, c, d)
+
+pt = open(sys.argv[1]).read()
+while len(pt) % 16: pt += "#"
+
+ct = "".join(encrypt(pt[i:i+16]) for i in xrange(0, len(pt), 16))
+open(sys.argv[1] + ".enc", "w").write(ct)
+```
+
+It's a Feistel Network and hence the name **gen**eralized **fei**stel. Basically chain rule. We can start by decrypting the d in the second step of encryption. From there it is easy to follow the chain and undo it. Here's the python script to decrypt the flag:
+
+```python
+## run with python2
+from struct import pack, unpack
+
+def F(w):
+    return ((w * 31337) ^ (w * 1337 >> 16)) % 2**32
+
+def decrypt(block):
+    a, b, c, d = unpack("<4I", block)
+    for i in xrange(32):
+        # decrypting the second step in encrypt
+        tempa = a
+        d = d ^ 1337
+        a = c ^ (F(d | F(d) ^ d))
+        b = b ^ (F(d ^ F(a) ^ (d | a)))
+        c = tempa ^ (F(d | F(b ^ F(a)) ^ F(d | b) ^ a))
+        # decrypting the frist step in encrypt
+        tempa = a
+        a = d ^ 31337
+        d = c ^ (F(a | F(a) ^ a))
+        c = b ^ (F(a ^ F(d) ^ (a | d)))
+        b = tempa ^ (F(a | F(c ^ F(d)) ^ F(a | c) ^ d))
+    return pack("<4I", a, b, c, d)
+
+ct = open("flag.enc").read()
+pt = "".join(decrypt(ct[i:i+16]) for i in xrange(0,len(ct), 16))
+print pt
+```
