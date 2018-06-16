@@ -145,3 +145,27 @@ Challenge: The company hired an inexperienced developer, but he told them he hid
 
 8. ​	This redirects us to a page with the {"flag":"ab003765f3424bf8e2c8d1d69762d72c"}
 9. ​ Decrypt the MD5 Hash to gain the flag
+
+### Newsletter
+
+    Challenge: the administrator put the backup file in the same root folder as the application, help us download this backup by retrieving the backup file name
+
+1. Enter the website provided in the challenge and you'll be redirected to a webpage that requires an email.
+2. Try entering a strings to see if there are any restrictions.
+3. You'll find that you have to enter an email address with the correct format to proceed. 
+4. right click on the page and inspect it's elements.
+5. You'll see that within the code, the form function has a type for the entry and it's initialized as email, therefor anything that isn't in an email format won't be accepted
+6. Next you want to try and change the type to text, then type anything in to see the outcome.
+7. You'll find that it still requires you to have both an @ and a . within your entry.
+8. try inputting anything again but this time adding a @. after your entry, you'll find that you are able to successfully input a string
+9. next step was to find out if I can sql inject the entry
+   1. at first I tried a general 'select * from email' followed by && @. to fulfill the input requirment
+   2. I ended up getting the same query that I tried inputting as an output on the top left of my webpage
+   3. realizing that sql might not work, I tried a different approach which was cross site scripting (XSS)
+      1. first I tried a simple  whoami in backticks followed by the && @.
+      
+         ```"whoami" && @. (replace the quotes with backticks (`) )```
+   4. this gave me another entry on the top left of the screen that showed the current user is www-data meaning our cross site scripting worked
+   5. following that, I decided to list all the files in the current directory by sending the same query but instead of whoami I entered ls (remember to change the type from email to text every time you try any entry)
+10. after doing so, I received a list of all files in the current directory, one of them being the name of the backup file "hgdr64.backup.tar.gz ", looking back at the challenge description, I realized that all that's required was the backup name so the name of the file ended up being our flag
+
