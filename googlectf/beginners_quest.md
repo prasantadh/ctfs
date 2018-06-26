@@ -1,6 +1,6 @@
 # Beginner's Quest
 
-##### Done in collaboration with [labeebabegum](https://github.com/labeeba)
+##### Done in collaboration with [labeebabegum](https://github.com/labeebabegum)
 
 ### Letter
 
