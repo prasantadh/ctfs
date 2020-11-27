@@ -56,6 +56,30 @@ The flag is chr(x[0]%256)+chr(x[1]%256)+...
 The challenge relies on finding modular inverse. For given integers `a` and `m`, `x` is said to be the modular inverse of `a` and `m` if `(a*x) % m = 1`. In our situation, `a*x mod m = c`. We just need to note `(a *inv(a, m) *c) % m = c` to solve the problem. That is `x = inv(a, m) * c`. However, the developers inserted a little trick and you need to do `x = (inv(a, m) *c) % m` to get the correct flag. I wrote a python script to print out the flag:
 
 ```python
+def inverse(a, m):
+	mm = m 
+	y = 0
+	x = 1
+	if (m == 1) :
+		return 0
+	while (a > 1) :
+		# q is quotient 
+		q = a // m
+		t = m
+		# m is remainder now, process 
+		# same as Euclid's algo 
+		m = a % m
+		a = t
+		t = y
+		# Update x and y
+		y = x - q * y
+		x = t
+		# Make x positive
+	if (x < 0) :
+		x = x + mm
+
+	return x
+
 with open('assets/lineq.txt') as f:
 	content = f.readlines()
 	f.close()
