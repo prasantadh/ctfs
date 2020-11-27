@@ -261,3 +261,120 @@ ct = open("flag.enc").read()
 pt = "".join(decrypt(ct[i:i+16]) for i in xrange(0,len(ct), 16))
 print pt
 ```
+
+### Transposed
+
+```tex
+Challenge: sseemga si dsenarotps?
+```
+We are given a cipher text and the file used to encrypt the text.
+
+```python
+
+#-*- coding:utf-8 -*-
+
+import random
+
+W = 7
+perm = range(W)
+random.shuffle(perm)
+
+msg = open("flag.txt").read().strip()
+while len(msg) % (2*W):
+    msg += "."
+
+for i in xrange(100):
+    msg = msg[1:] + msg[:1]
+    msg = msg[0::2] + msg[1::2]
+    msg = msg[1:] + msg[:1]
+    res = ""
+    for j in xrange(0, len(msg), W):
+        for k in xrange(W):
+            res += msg[j:j+W][perm[k]]
+    msg = res
+print msg
+```
+My first relieve after figuring out what the code does was that no sort of **IV**(of course this is no AES sh*t) or **salting** is being done with the data, which means that the entire encryption process is deterministic, that is, repeat it 100 times and the same input and key sequence will give same output. and if we look at the ciphertext:**L{NTP#AGLCSF.#OAR4A#STOL11__}PYCCTO1N#RS.S** , we see that it's just the jumbled up flag (we can see the characters "{}LAGF" which gives us an hint that it's probably the normal flag format:**FLAG{...}**).
+
+Encrypt process tells us that "." is appended to the initial plaintext to ensure it's a multiple of 7.
+
+Since ciphertext contains two "." character and it's length is 42, i assume the initial plaintext(flag) length is 40 and the two "." were added to compensate, of course this approach breaks down(a litle) if the initial plaintext itself contains "." characters as we won't be able to straightforwardly determine how many "." were appended, as there's no easy way to know the number of "." characters that are part of the initial plaintext, and no easy way to know the number of "." characters that were appended to the initial plaintext to form the final plaintext, one way to figure it out would be trial and error method of assuming the number(X) of "." chars appended|included in the final|initial plaintext respectively! starting at no. 1, then increasing by 1 as you go(search space is effectively 0 > X ≤ number of "." chars present in ciphertext, in our own case 2 "." chars). but am lucky and my assumption was right. 
+
+```tex
+Knowing this, i decided to try out a **chosen plaintext attack** with plaintext:**"FLAG{lets_find_a_kind_of_reverse_logic_}.."**(length is already multiple of 7).
+
+The goal is to match the indexes of known chars in the given ciphertext, to known chars in my derived ciphertext where known chars are **"{}LAGF.."**.
+```
+So i wrote a script to bruteforce the key sequence:
+
+```python
+#-*- coding:utf-8 -*-
+
+import random
+import itertools
+
+W = 7
+perm = [0,1,2,3,4,5,6]
+perm2 = []
+output = open('qq.txt', 'wt')
+l = itertools.permutations(perm, 7)
+
+for pack in l:
+	res=""
+	msg = "FLAG{lets_find_a_kind_of_reverse_logic_}.." #Known plaintext attack!!! FLAG{----------------------------------}..
+	perm = list(pack)
+	for i in range(100):
+	    msg = msg[1:] + msg[:1]
+	    msg = msg[0::2] + msg[1::2]
+	    msg = msg[1:] + msg[:1]
+	    res = ""
+	    for j in range(0, len(msg), W):
+	        for k in range(W):
+	            res += msg[j:j+W][perm[k]]
+	    msg = res
+	print(msg, perm)
+	# output.writelines(f"res[{msg}]		perm[{perm}]\n\n")
+	#L{ NTP#AGLC S F  . #OAR4A#STOL11__ } PYCCTO1N#RS . S  --> given ciphertext
+	#0:2             12                28            40
+	if msg[12] == "." and msg[40] == "." and msg[0:2] == "L{" and msg[28] == "}":
+		print("key sequence match found! ", perm)
+		output.writelines(f"match found! ...res[{msg}]		 perm[{perm}]\n\n")
+		perm2 = perm
+		exit(1)
+```
+Yes!, now that we have the correct key sequence**(3, 2, 5, 6, 0, 4, 1) that produced the original ciphertext, all that's left is to append code that reverses the encryption process, giving us our well deserved flag!!
+
+```python
+
+for z in range(100):
+	char = []
+	res=""
+	for x in range(42):
+		char.append(" ")
+	for x in range(0,42,7):
+		sl = msg[x:x+7]
+		for y,z in enumerate(sl):
+			char[perm2[y]+x] = z
+	msg = "".join(char)
+	msg = msg[-1::]+msg[:-1]
+	for x in range(0,len(msg),21):
+		slc = msg[x:x+21]
+		if x == 0:
+			print("slice even - ",slc)
+			count = 0
+			for y in slc:
+				char[count] = y
+				count += 2
+		if x == 21:
+			print("slice odd - ",slc)
+			count = 1
+			for y in slc:
+				char[count] = y
+				count += 2
+
+	msg = "".join(char)
+	msg = msg[-1::]+msg[:-1]
+print(msg)
+
+```
+And there you have it!, but beware, it took me around 25hours(total) to solve this (yes, am dumb, i know).
