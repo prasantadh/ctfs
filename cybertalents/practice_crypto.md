@@ -378,5 +378,3 @@ print(msg)
 
 ```
 And there you have it!, but beware, it took me around 25hours(total) to solve this (yes, am dumb, i know).
-
-script can be found here: [revtrans.py](./script/revtrans.py)
