@@ -162,9 +162,9 @@ After a bit of playing around, we noticed that `op` was only producing `0` or `2
  # verify suspicion that as long as the last byte is the same
  # the step function will give us exactly the same sequence
  # of last bytes afterwards
- x = H(os.urandom(32))
- y = x % 256
  for i in range(100):
+     x = H(os.urandom(32))
+     y = x % 256
      if STEP(x) % 256 != STEP(y) % 256:
          print "wrong direction"
  print "suspicion verified"
